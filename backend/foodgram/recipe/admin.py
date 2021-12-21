@@ -1,3 +1,23 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Tag, Ingredient, Recipe, User
+
+
+class UserAdmin(admin.ModelAdmin):
+    list_filter = ('email', 'username')
+
+
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'author')
+    list_filter = ('author', 'name', 'tags')
+    # На странице рецепта вывести общее число добавлений этого рецепта в избранное.
+
+
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'units')
+    list_filter = ('name',)
+
+
+admin.register(Recipe, RecipeAdmin)
+admin.register(User, UserAdmin)
+admin.register(Ingredient, IngredientAdmin)

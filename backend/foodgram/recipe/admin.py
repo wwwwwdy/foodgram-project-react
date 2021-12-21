@@ -18,6 +18,7 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('name',)
 
 
-admin.register(Recipe, RecipeAdmin)
-admin.register(User, UserAdmin)
-admin.register(Ingredient, IngredientAdmin)
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+admin.site.register(Ingredient, IngredientAdmin)

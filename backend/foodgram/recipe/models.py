@@ -10,6 +10,9 @@ class Ingredient(models.Model):
     quantity = models.IntegerField()
     units = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
@@ -17,8 +20,11 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    color = ColorField(max_length=7, format='hexa')
+    color = ColorField(max_length=7, default='#FF0000')
     slug = models.SlugField(max_length=200, db_index=True, unique=True, verbose_name='URL')
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Тэг'
@@ -35,7 +41,7 @@ class Recipe(models.Model):
     description = models.TextField(verbose_name='Описание', help_text='Заполните описание')
     ingredients = models.ManyToManyField(Ingredient)
     tags = models.ManyToManyField(Tag)
-    cooking_time = models.TimeField()
+    cooking_time = models.IntegerField()
 
     def __str__(self):
         return self.name

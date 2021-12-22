@@ -1,7 +1,11 @@
 from rest_framework import viewsets
-
-from .serializers import TagSerializer, RecipeSerializer, RecipeSerializerCreate, IngredientSerializer
+from djoser.views import UserViewSet
+from .serializers import TagSerializer, RecipeSerializer, IngredientSerializer, UserSerializer
 from recipe.models import Tag, Recipe, Ingredient
+
+
+class CustomUserViewSet(UserViewSet):
+    serializer_class = UserSerializer
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -9,16 +13,11 @@ class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
-
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return RecipeSerializer
-        return RecipeSerializerCreate
-
-
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer

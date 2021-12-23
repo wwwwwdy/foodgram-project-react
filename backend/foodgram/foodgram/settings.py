@@ -86,7 +86,7 @@ DATABASES = {
     }
 }
 
-
+# AUTH_USER_MODEL = 'recipe.User'
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -144,4 +144,10 @@ SIMPLE_JWT = {
     # Устанавливаем срок жизни токена
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+DJOSER = {
+    'SERIALIZERS': {
+         'user_create': 'api.serializers.UserRegistrationSerializer'
+    }
 }

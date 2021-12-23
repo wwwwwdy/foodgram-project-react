@@ -12,5 +12,5 @@ router.register(r'users', CustomUserViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('', include('djoser.urls')),
-    # path('', include('djoser.urls.jwt')),
+    path('', include('djoser.urls.jwt')),
 ]

@@ -9,10 +9,10 @@ class UserRegistrationSerializer(BaseUserRegistrationSerializer):
     class Meta(BaseUserRegistrationSerializer.Meta):
         fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password',)
 
-# class CustomUserSerializer(UserSerializer):
-#     class Meta:
-#         fields = ('email', 'id', 'username', 'first_name', 'last_name')
-#         model = User
+class CustomUserSerializer(UserSerializer):
+    class Meta:
+        fields = ('email', 'id', 'username', 'first_name', 'last_name')
+        model = User
 
 
 class RecipeSerializer(serializers.ModelSerializer):

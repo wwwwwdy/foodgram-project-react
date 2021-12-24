@@ -9,6 +9,7 @@ class UserRegistrationSerializer(BaseUserRegistrationSerializer):
     class Meta(BaseUserRegistrationSerializer.Meta):
         fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password',)
 
+
 class CustomUserSerializer(UserSerializer):
     class Meta:
         fields = ('email', 'id', 'username', 'first_name', 'last_name')
@@ -35,4 +36,3 @@ class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ('id',)
         model = Ingredient
-

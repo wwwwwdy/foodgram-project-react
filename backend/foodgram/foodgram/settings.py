@@ -151,3 +151,5 @@ DJOSER = {
          'user_create': 'api.serializers.UserRegistrationSerializer'
     }
 }
+
+AUTH_USER_MODEL = 'recipe.User'

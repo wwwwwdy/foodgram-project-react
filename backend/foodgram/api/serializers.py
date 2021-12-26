@@ -1,12 +1,17 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
 from recipe.models import Tag, Ingredient, Recipe, User
 from djoser.serializers import UserSerializer
-from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
+from djoser.serializers import UserCreateSerializer
 
 
-class UserRegistrationSerializer(BaseUserRegistrationSerializer):
-    class Meta(BaseUserRegistrationSerializer.Meta):
+class UserRegistrationSerializer(UserCreateSerializer):
+    email = serializers.CharField(max_length=254, help_text='Введите почту', )
+    username = serializers.CharField(max_length=150, help_text='Введите имя пользователя')
+    first_name = serializers.CharField(max_length=150, help_text='Введите ваше имя')
+    last_name = serializers.CharField(max_length=150, help_text='Введите вашу фамилию')
+    password = serializers.CharField(max_length=150, help_text='Введите пароль')
+
+    class Meta(UserCreateSerializer.Meta):
         fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password',)
 
 

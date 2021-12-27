@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from djoser.views import UserViewSet
-from .serializers import TagSerializer, RecipeSerializer, IngredientSerializer, UserSerializer
+from .serializers import TagSerializer, RecipeSerializer, IngredientSerializer, CustomUserSerializer
 from recipe.models import Tag, Recipe, Ingredient
 from rest_framework import status
 from rest_framework.response import Response
@@ -15,7 +15,7 @@ class Logout(APIView):
 
 
 class CustomUserViewSet(UserViewSet):
-    serializer_class = UserSerializer
+    serializer_class = CustomUserSerializer
 
 
 class TagViewSet(viewsets.ModelViewSet):

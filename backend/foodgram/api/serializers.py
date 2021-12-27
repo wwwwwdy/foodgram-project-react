@@ -5,7 +5,7 @@ from djoser.serializers import UserCreateSerializer
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
-    email = serializers.CharField(max_length=254, help_text='Введите почту', )
+    email = serializers.CharField(max_length=254, help_text='Введите почту',)
     username = serializers.CharField(max_length=150, help_text='Введите имя пользователя')
     first_name = serializers.CharField(max_length=150, help_text='Введите ваше имя')
     last_name = serializers.CharField(max_length=150, help_text='Введите вашу фамилию')
@@ -16,6 +16,11 @@ class UserRegistrationSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
+    # username = serializers.CharField(max_length=150)
+    # email = serializers.CharField(max_length=254)
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+
     class Meta:
         fields = ('email', 'id', 'username', 'first_name', 'last_name')
         model = User
@@ -33,7 +38,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
-        exclude = ('id',)
+        fields = '__all__'
         model = Tag
 
 

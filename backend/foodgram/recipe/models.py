@@ -16,8 +16,8 @@ User = get_user_model()
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=200)
-    quantity = models.IntegerField()
-    units = models.CharField(max_length=50)
+    amount = models.IntegerField(blank=True, null=True)
+    measurement_unit = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name

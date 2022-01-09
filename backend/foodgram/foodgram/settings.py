@@ -26,7 +26,7 @@ SECRET_KEY = 'z+n&uqm9m9ddbf49vk&@z_kqt(py(0l38li3%u0&$d34g1g82*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'recipe',
     'api',
+    'users',
     'colorfield',
     'rest_framework',
     'rest_framework.authtoken',
@@ -131,13 +132,15 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 6
 }
 
 
@@ -148,9 +151,19 @@ SIMPLE_JWT = {
 }
 
 DJOSER = {
+    'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
-         'user_create': 'api.serializers.UserRegistrationSerializer'
-    }
+        'user_create': 'users.serializers.UserRegistrationSerializer',
+        'user': 'users.serializers.CustomUserSerializer',
+        'current_user': 'users.serializers.CustomUserSerializer',
+        # 'user_create': 'users.serializers.UserCreateSerializer',
+        # 'user': 'users.serializers.UserSerializer'
+    },
+
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
 }
 
-# AUTH_USER_MODEL = 'recipe.User'
+AUTH_USER_MODEL = 'users.CustomUser'

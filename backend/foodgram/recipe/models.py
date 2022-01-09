@@ -1,17 +1,7 @@
 from colorfield.fields import ColorField
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, AbstractUser
-from django.contrib.auth import get_user_model
 from django.db import models
-
-User = get_user_model()
-
-
-# class User(AbstractUser):
-#     email = models.CharField(max_length=254, unique=True, help_text='Введите почту',)
-#     username = models.CharField(max_length=150, unique=True, help_text='Введите имя пользователя')
-#     first_name = models.CharField(max_length=150, help_text='Введите ваше имя')
-#     last_name = models.CharField(max_length=150, help_text='Введите вашу фамилию')
-#     password = models.CharField(max_length=150, help_text='Введите пароль')
+from users.models import CustomUser
 
 
 class Ingredient(models.Model):
@@ -41,13 +31,14 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    author = models.ForeignKey(User,
+    author = models.ForeignKey(CustomUser,
                                on_delete=models.CASCADE,
                                related_name='recipes',
                                verbose_name='Рецепт')
     name = models.CharField(max_length=200, verbose_name='Наименование', help_text='Введите наименование')
     image = models.ImageField(upload_to='recipe/', help_text='Загрузите изображение')
     description = models.TextField(verbose_name='Описание', help_text='Заполните описание')
+    # ingredients = models.ManyToManyField(to=Ingredient, through='RecipesIngredients')
     ingredients = models.ManyToManyField(Ingredient)
     tags = models.ManyToManyField(Tag)
     cooking_time = models.IntegerField()

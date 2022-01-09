@@ -1,5 +1,11 @@
 version: '3.3'
 services:
+  db:
+    image: sqli
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
 
   frontend:
     build:

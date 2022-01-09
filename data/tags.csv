@@ -1,0 +1,5 @@
+class Tag(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    color = ColorField(max_length=7, default='#FF0000')
+    slug = models.SlugField(max_length=200, db_index=True, unique=True, verbose_name='URL')
+Завтрак,

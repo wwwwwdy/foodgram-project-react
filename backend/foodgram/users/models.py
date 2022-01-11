@@ -12,8 +12,8 @@ class CustomUser(AbstractUser):
 class Follow(models.Model):
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='follower')
-    # following = models.ForeignKey(
-    #     CustomUser, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name='following')
 
     class Meta:
         constraints = [

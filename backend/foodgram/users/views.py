@@ -52,11 +52,19 @@ class ProfileUserViewSet(UserViewSet):
 
 class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
-    # filter_backends = (SearchFilter,)
-    # search_fields = ('following__username',)
+    filter_backends = (SearchFilter,)
+    search_fields = ('following__username',)
 
     def get_queryset(self):
         return self.request.user.follower.all()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class APIFollow(APIView):
+    def get(self):
+        user = self.request.user
+        followers = user.follower.all()
+        serializer = FollowSerializer(followers, many=True)
+        return Response(serializer.data)

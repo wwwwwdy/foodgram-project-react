@@ -4,6 +4,7 @@ from .models import CustomUser, Follow
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.relations import SlugRelatedField
 
+
 class UserRegistrationSerializer(UserCreateSerializer):
     email = serializers.EmailField(max_length=254, help_text='Введите почту',)
     username = serializers.CharField(max_length=150, help_text='Введите имя пользователя')
@@ -47,19 +48,19 @@ class FollowSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-    # following = SlugRelatedField(
-    #     slug_field='username', queryset=CustomUser.objects.all()
-    # )
+    following = SlugRelatedField(
+        slug_field='username', queryset=CustomUser.objects.all()
+    )
 
     class Meta:
         fields = '__all__'
         model = Follow
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=Follow.objects.all(),
-        #         fields=('user', 'following'),
-        #     )
-        # ]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('user', 'following'),
+            )
+        ]
 
     def validate_following(self, value):
         if self.context['request'].user == value:

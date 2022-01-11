@@ -1,6 +1,6 @@
 from rest_framework import viewsets, generics, permissions
 from djoser.views import UserViewSet
-from .serializers import CustomUserSerializer, UserRegistrationSerializer, FollowSerializers
+from .serializers import CustomUserSerializer, UserRegistrationSerializer, FollowSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -49,20 +49,19 @@ class ProfileUserViewSet(UserViewSet):
             serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class FollowViewSet(viewsets.ViewSet):
-    serializer_class = FollowSerializers
-
-    def get_queryset(self):
-        """Filter queryset by following user."""
-        followers = self.request.user.follower.all()
+# class FollowViewSet(viewsets.ViewSet):
+#     serializer_class = FollowSerializers
+#
+#     def get_queryset(self):
+#         """Filter queryset by following user."""
 #         followers = self.request.user.follower.all()
-        return followers
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        following = get_object_or_404(CustomUser, pk=serializer.initial_data.get('id'))
-        serializer.save(user=user, author=following)
+# #         followers = self.request.user.follower.all()
+#         return followers
+#
+#     def perform_create(self, serializer):
+#         user = self.request.user
+#         following = get_object_or_404(CustomUser, pk=serializer.initial_data.get('id'))
+#         serializer.save(user=user, author=following)
 #     @action(detail=True, methods=['post'])
 #     def add_followers(self, request, user_id, following_id):
 
@@ -75,18 +74,54 @@ class FollowViewSet(viewsets.ViewSet):
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# class FollowViewSet(APIView):
-#     def post(self, request, pk=None):
-#         user = self.request.user
-#         author = get_object_or_404(CustomUser, id=self.kwargs['pk'])
-#         serializer = FollowSerializers(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(user=user, author=author)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class APIFollowers(APIView):
+    def get(self):
+        user = self.request.user
+        following = user.follower.all()
+        serializer = FollowSerializer(following, many=True)
+        return Response(serializer.data)
 
 
+class APIFollow(APIView):
+    def post(self, request, pk=None):
+        user = self.request.user
+        author = get_object_or_404(CustomUser, id=self.kwargs['pk'])
+        serializer = FollowSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=user, author=author)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self):
+        user = self.request.user
+        unfollowing = user.follower.get(id=id)
+        unfollowing.delete()
+
+
+class APIFollow(viewsets.ModelViewSet):
+    serializer_class = FollowSerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ('following__username',)
+
+    def get_queryset(self):
+        return self.request.user.follower.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    #
+    # def post(self, request, pk=None):
+    #     user = self.request.user
+    #     author = get_object_or_404(CustomUser, id=self.kwargs['pk'])
+    #     serializer = FollowSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save(user=user, author=author)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #
+    # def delete(self, request, pk=None):
+    #     user = self.request.user
+    #     unfollowing = user.follower.get(pk=id)
+    #     unfollowing.delete()
 # class FollowViewSet(viewsets.ModelViewSet):
 #     serializer_class = FollowSerializer
 #     # filter_backends = (SearchFilter,)

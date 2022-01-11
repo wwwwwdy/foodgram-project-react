@@ -5,15 +5,17 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    is_subscribed = models.BooleanField(default=False)
-    REQUIRED_FIELDS = ('first_name', 'last_name', 'email')
+    email = models.EmailField(max_length=254, unique=True)
+    # is_subscribed = models.BooleanField(default=False)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('first_name', 'last_name', 'username')
 
 
 class Follow(models.Model):
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='follower')
-    # following = models.ForeignKey(
-    #     CustomUser, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name='following')
 
     class Meta:
         constraints = [
@@ -22,4 +24,4 @@ class Follow(models.Model):
         ]
 
     def __str__(self):
-        f"{self.user} follows {self.following}"
+        return f"{self.user} follows {self.following}"

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import CustomUser, Follow
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.relations import SlugRelatedField
-
+from recipe.models import Recipe
 
 class UserRegistrationSerializer(UserCreateSerializer):
     email = serializers.EmailField(max_length=254, help_text='Введите почту',)
@@ -16,13 +16,7 @@ class UserRegistrationSerializer(UserCreateSerializer):
         fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password')
 
 
-class UserTokenSerializer(TokenSerializer):
-    pass
-
-
 class CustomUserSerializer(UserSerializer):
-    # username = serializers.CharField(max_length=150)
-    # email = serializers.CharField(max_length=254)
     first_name = serializers.CharField(max_length=150, required=True)
     last_name = serializers.CharField(max_length=150, required=True)
     is_subscribed = serializers.BooleanField(default=False)
@@ -31,41 +25,6 @@ class CustomUserSerializer(UserSerializer):
         fields = ('username', 'email', 'id', 'first_name', 'last_name', 'is_subscribed')
         model = CustomUser
 
-
-# class FollowSerializer(serializers.ModelSerializer):
-#     id = serializers.PrimaryKeyRelatedField(source='author.id')
-#     email = serializers.EmailField(read_only=True, source='author.email')
-#     username = serializers.CharField(read_only=True, source='author.username')
-#     first_name = serializers.CharField(read_only=True, source='author.first_name')
-#     last_name = serializers.CharField(read_only=True, source='author.last_name')
-#
-#     class Meta:
-#         model = Follow
-#         fields = '__all__'
-class FollowSerializer(serializers.ModelSerializer):
-    user = SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-    following = SlugRelatedField(
-        slug_field='username', queryset=CustomUser.objects.all()
-    )
-
-    class Meta:
-        fields = '__all__'
-        model = Follow
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Follow.objects.all(),
-                fields=('user', 'following'),
-            )
-        ]
-
-    def validate_following(self, value):
-        if self.context['request'].user == value:
-            raise serializers.ValidationError('Вы уже подписаны ')
-        return value
 
 class UserFollowingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,11 +41,11 @@ class UserFollowingSerializer(serializers.ModelSerializer):
 
 class FollowingSerializer(serializers.ModelSerializer):
 
-    following_user_id = serializers.SlugRelatedField(slug_field='username', read_only=True)
+#     following = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
-        model = Follow
-        fields = ("id", "following",)
+        model = Recipe
+        fields = '__all__'
 
 
 class FollowersSerializer(serializers.ModelSerializer):
@@ -97,21 +56,14 @@ class FollowersSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     following = serializers.SerializerMethodField()
-    followers = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
-        fields = (
-            "id",
-            "email",
-            "username",
-            "following",
-            "followers",
-        )
+        fields = ("email", "id", "username", "first_name", "last_name",)
         extra_kwargs = {"password": {"write_only": True}}
-
+#
     def get_following(self, obj):
         return FollowersSerializer(obj.following.all(), many=True).data
-
-    def get_followers(self, obj):
-        return FollowersSerializer(obj.follower.all(), many=True).data
+#
+#     def get_followers(self, obj):
+#         return FollowersSerializer(obj.follower.all(), many=True).data

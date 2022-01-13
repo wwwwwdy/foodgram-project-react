@@ -81,3 +81,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     pagination_class = PageNumberPagination
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

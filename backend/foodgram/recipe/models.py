@@ -6,7 +6,6 @@ from users.models import CustomUser
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=200)
-    amount = models.IntegerField(blank=True, null=True)
     measurement_unit = models.CharField(max_length=50)
 
     def __str__(self):
@@ -37,9 +36,10 @@ class Recipe(models.Model):
                                verbose_name='Рецепт')
     name = models.CharField(max_length=200, verbose_name='Наименование', help_text='Введите наименование')
     image = models.ImageField(upload_to='recipe/', help_text='Загрузите изображение')
-    description = models.TextField(verbose_name='Описание', help_text='Заполните описание')
+    text = models.TextField(verbose_name='Описание', help_text='Заполните описание')
     # ingredients = models.ManyToManyField(to=Ingredient, through='RecipesIngredients')
-    ingredients = models.ManyToManyField(Ingredient)
+    ingredients = models.ManyToManyField(Ingredient, through='IngredientRecipe')
+#     tags = models.ManyToManyField(Tag, through='TagRecipe')
     tags = models.ManyToManyField(Tag)
     cooking_time = models.IntegerField()
 
@@ -49,6 +49,21 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+
+# class TagRecipe(models.Model):
+#     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='tags')
+#     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+#
+#     def __str__(self):
+#         return f'{self.tag} {self.recipe}'
+
+
+class IngredientRecipe(models.Model):
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.ingredient} {self.recipe}'
 
 
 

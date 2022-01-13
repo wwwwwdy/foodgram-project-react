@@ -66,3 +66,52 @@ class FollowSerializer(serializers.ModelSerializer):
         if self.context['request'].user == value:
             raise serializers.ValidationError('Вы уже подписаны ')
         return value
+
+class UserFollowingSerializer(serializers.ModelSerializer):
+    class Meta:
+
+        asd = UserSerializer(many=True)
+
+        model = CustomUser
+        fields = ('id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'email')
+
+
+class FollowingSerializer(serializers.ModelSerializer):
+
+    following_user_id = serializers.SlugRelatedField(slug_field='username', read_only=True)
+
+    class Meta:
+        model = Follow
+        fields = ("id", "following",)
+
+
+class FollowersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = ("id", "user",)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    following = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            "id",
+            "email",
+            "username",
+            "following",
+            "followers",
+        )
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def get_following(self, obj):
+        return FollowersSerializer(obj.following.all(), many=True).data
+
+    def get_followers(self, obj):
+        return FollowersSerializer(obj.follower.all(), many=True).data

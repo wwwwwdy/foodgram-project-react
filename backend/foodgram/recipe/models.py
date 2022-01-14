@@ -40,7 +40,7 @@ class Recipe(models.Model):
     # ingredients = models.ManyToManyField(to=Ingredient, through='RecipesIngredients')
     ingredients = models.ManyToManyField(Ingredient, through='IngredientRecipe')
 #     tags = models.ManyToManyField(Tag, through='TagRecipe')
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, related_name='tags')
     cooking_time = models.IntegerField()
 
     def __str__(self):
@@ -59,8 +59,9 @@ class Recipe(models.Model):
 
 
 class IngredientRecipe(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, null=True, blank=True)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    amount = models.IntegerField()
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'

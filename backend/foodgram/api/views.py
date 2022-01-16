@@ -1,6 +1,6 @@
 from rest_framework import viewsets, generics, permissions
 from djoser.views import UserViewSet
-from .serializers import TagSerializer, RecipeSerializer, IngredientSerializer
+from .serializers import TagSerializer, RecipeSerializer, IngredientSerializer, RecipeListSerializer
 from recipe.models import Tag, Recipe, Ingredient
 from rest_framework import status
 from rest_framework.response import Response

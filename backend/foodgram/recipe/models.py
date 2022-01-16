@@ -43,6 +43,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, related_name='tags')
     cooking_time = models.IntegerField()
 
+
     def __str__(self):
         return self.name
 
@@ -65,43 +66,3 @@ class IngredientRecipe(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'
-
-
-
-# class MyUserManager(BaseUserManager):
-#     def _create_user(self, email, username, first_name, last_name, password, **extra_fields):
-#         if not email:
-#             raise ValueError('Вы не ввели почту')
-#         if not username:
-#             raise ValueError('Вы не ввели логин')
-#         if not first_name:
-#             raise ValueError('Вы не ввели имя')
-#         if not last_name:
-#             raise ValueError('Вы не ввели фамилию')
-#         user = self.model(email=self.normalize_email(email), username=username, **extra_fields)
-#         user.set_password(password)
-#         user.save(using=self._db)
-#         return user
-#
-#     def create_user(self, email, username, first_name, last_name, password):
-#         return self._create_user(email, username, first_name, last_name, password)
-#
-#     def create_superuser(self, email, username, first_name, last_name, password):
-#         return self._create_user(email, username, first_name, last_name, password, is_staff=True, is_superuser=True)
-#
-#
-# class User(AbstractBaseUser, PermissionsMixin):
-#     username = models.CharField(max_length=150, unique=True)
-#     email = models.EmailField(max_length=254, unique=True)
-#     first_name = models.CharField(max_length=150)
-#     last_name = models.CharField(max_length=150)
-#     is_active = models.BooleanField(default=True)
-#     is_staff = models.BooleanField(default=False)
-#
-#     objects = MyUserManager()
-#
-#     USERNAME_FIELD = 'email'
-#     REQUIRED_FIELDS = ['username']
-#
-#     def __str__(self):
-#         return self.username

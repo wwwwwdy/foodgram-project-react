@@ -1,14 +1,13 @@
-from rest_framework import viewsets, generics, permissions
-from djoser.views import UserViewSet
+from rest_framework import viewsets
 from .serializers import TagSerializer, RecipeSerializer, IngredientSerializer, RecipeListSerializer
 from recipe.models import Tag, Recipe, Ingredient
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
-
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
+from rest_framework.permissions import IsAuthenticated
 # class CreateProfileView(generics.CreateAPIView):
 #     serializer_class = UserRegistrationSerializer
 #     queryset = User.objects.all()
@@ -62,7 +61,11 @@ from rest_framework.decorators import action
 #         request.user.auth_token.delete()
 #         return Response(status=status.HTTP_200_OK)
 
-
+class CreateDestroyListViewSet(CreateModelMixin,
+                               DestroyModelMixin,
+                               ListModelMixin,
+                               viewsets.GenericViewSet):
+    pass
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -89,3 +92,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 #     def perform_create(self, serializer):
 #         serializer.save(author=self.request.user)
+
+
+class APIFavorite(CreateDestroyListViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeListSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = PageNumberPagination
+    filter_backends = ()
+    # def post(self, request, serializer, pk):
+    #     user = self.request.user
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer(user=user, recipe=recipe)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #
+    # def destroy(self, Des):
+    #     recipe = get_object_or_404(Recipe, id=self.kwargs.get('recipe_id'))
+    #     self.perform_destroy(recipe)

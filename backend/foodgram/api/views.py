@@ -82,13 +82,13 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeListSerializer
     pagination_class = PageNumberPagination
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return RecipeListSerializer
-        return RecipeSerializer
+        if self.action == 'create':
+            return RecipeSerializer
+        return RecipeListSerializer
 
 #     def perform_create(self, serializer):
 #         serializer.save(author=self.request.user)

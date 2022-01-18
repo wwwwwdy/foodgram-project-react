@@ -66,3 +66,8 @@ class IngredientRecipe(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, null=True, related_name='favorite')

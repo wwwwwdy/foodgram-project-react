@@ -1,6 +1,7 @@
 from rest_framework import viewsets
-from .serializers import TagSerializer, RecipeSerializer, IngredientSerializer, RecipeListSerializer
-from recipe.models import Tag, Recipe, Ingredient
+from .serializers import (TagSerializer, RecipeSerializer, IngredientSerializer, RecipeListSerializer,
+                          FavoriteSerializer)
+from recipe.models import Tag, Recipe, Ingredient, Favorite
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -8,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 # class CreateProfileView(generics.CreateAPIView):
 #     serializer_class = UserRegistrationSerializer
 #     queryset = User.objects.all()
@@ -94,12 +96,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
 #         serializer.save(author=self.request.user)
 
 
-class APIFavorite(CreateDestroyListViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeListSerializer
-    permission_classes = (IsAuthenticated,)
-    pagination_class = PageNumberPagination
-    filter_backends = ()
+# class APIFavorite(CreateDestroyListViewSet):
+#     queryset = Recipe.objects.all()
+#     serializer_class = RecipeListSerializer
+#     permission_classes = (IsAuthenticated,)
+#     pagination_class = PageNumberPagination
+#     filter_backends = ()
     # def post(self, request, serializer, pk):
     #     user = self.request.user
     #     recipe = get_object_or_404(Recipe, id=pk)
@@ -111,3 +113,60 @@ class APIFavorite(CreateDestroyListViewSet):
     # def destroy(self, Des):
     #     recipe = get_object_or_404(Recipe, id=self.kwargs.get('recipe_id'))
     #     self.perform_destroy(recipe)
+# class AddingAndDeletingListMixin:
+#     serializer_class = None
+#     model_class = None
+#
+#     def post(self, request, recipe_id):
+#         user = request.user.id
+#         data = {"user": user, "recipe": recipe_id}
+#         serializer = self.serializer_class(
+#             data=data,
+#             context={"request": request},
+#         )
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status.HTTP_201_CREATED)
+#
+#     def delete(self, request, recipe_id):
+#         user = request.user
+#         obj = get_object_or_404(
+#             self.model_class, user=user, recipe__id=recipe_id
+#         )
+#         obj.delete()
+#         model_title = self.model_class._meta.verbose_name.title()
+#         return Response(
+#             f"Успешно удалено: {model_title}!", status.HTTP_204_NO_CONTENT
+#         )
+#
+#
+# class FavoriteViewSet(AddingAndDeletingListMixin, APIView):
+#     serializer_class = FavoriteRecipeSerizlizer
+#     model_class = Favorite
+
+#
+# class PurchaseListView(AddingAndDeletingListMixin, APIView):
+#     serializer_class = PurchaseListSerializer
+#     model_class = PurchaseList
+
+class FavoriteViewSet(APIView):
+    def post(self, request, recipe_id):
+        user = request.user.id
+        data = {"user": user, "recipe": recipe_id}
+        serializer = FavoriteSerializer(
+            data=data,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        user = request.user
+        favorite_recipe = get_object_or_404(
+            Favorite, user=user, recipe__id=recipe_id
+        )
+        favorite_recipe.delete()
+        return Response(
+            "Рецепт удален из избранного", status.HTTP_204_NO_CONTENT
+        )

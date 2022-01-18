@@ -1,3 +1,5 @@
+import email
+from urllib import request
 from djoser.serializers import UserCreateSerializer, TokenSerializer, UserSerializer
 from rest_framework import serializers
 from .models import CustomUser, Follow
@@ -19,12 +21,17 @@ class UserRegistrationSerializer(UserCreateSerializer):
 class CustomUserSerializer(UserSerializer):
     first_name = serializers.CharField(max_length=150, required=True)
     last_name = serializers.CharField(max_length=150, required=True)
-    is_subscribed = serializers.BooleanField(default=False)
+    is_subscribed = serializers.SerializerMethodField('get_is_subscribed')
 
     class Meta:
         fields = ('username', 'email', 'id', 'first_name', 'last_name', 'is_subscribed')
         model = CustomUser
 
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous or not user:
+            return False
+        return True
 
 class UserFollowingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,9 +61,9 @@ class FollowersSerializer(serializers.ModelSerializer):
         fields = ("id", "user",)
 
 
-class UserSerializer(serializers.ModelSerializer):
+class FollowUserSerializer(serializers.ModelSerializer):
     following = serializers.SerializerMethodField()
-
+    is_subscribed = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
         fields = ("email", "id", "username", "first_name", "last_name",)
@@ -64,6 +71,17 @@ class UserSerializer(serializers.ModelSerializer):
 #
     def get_following(self, obj):
         return FollowersSerializer(obj.following.all(), many=True).data
+    
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return True
 #
 #     def get_followers(self, obj):
 #         return FollowersSerializer(obj.follower.all(), many=True).data
+
+class SerializerFollow(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(source='following.id')
+    email = serializers.ReadOnlyField(source='following.email')
+    username = serializers

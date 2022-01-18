@@ -152,11 +152,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class FavoriteViewSet(APIView):
     def post(self, request, recipe_id):
         user = request.user.id
+        print(request)
+        print(recipe_id)
         data = {"user": user, "recipe": recipe_id}
+        print(data)
         serializer = FavoriteSerializer(
             data=data,
             context={"request": request},
         )
+        # print(serializer)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status.HTTP_201_CREATED)

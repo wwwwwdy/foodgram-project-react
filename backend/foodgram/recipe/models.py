@@ -69,5 +69,5 @@ class IngredientRecipe(models.Model):
 
 
 class Favorite(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, null=True, related_name='favorite')

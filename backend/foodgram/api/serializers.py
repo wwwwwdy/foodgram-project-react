@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from recipe.models import Tag, Ingredient, Recipe, CustomUser, IngredientRecipe, Favorite
+from recipe.models import Tag, Ingredient, Recipe, CustomUser, IngredientRecipe, Favorite, ShoppingCart
 from users.serializers import CustomUserSerializer
 
 class Base64ImageField(serializers.ImageField):
@@ -193,16 +193,49 @@ class RecipeSerializer(serializers.ModelSerializer):
         context = {'request': request}
         return RecipeListSerializer(instance, context=context).data
 
+    def validate(self, data):
+        ingredients = data['ingredients']
+        list_ingredients = []
+        for ingredient in ingredients:
+            if ingredient['amount'] <= 0:
+                raise serializers.ValidationError(
+                    'Количество ингредиента должно быть больше нуля'
+                )
+            list_ingredients.append(ingredient['ingredient'])
+        if not list_ingredients:
+            raise serializers.ValidationError(
+                'Нужно добавить хотя бы один ингредиент'
+            )
+        if len(list_ingredients) != len(list(set(list_ingredients))):
+            raise serializers.ValidationError(
+                'Ингридиенты не должны повторяться'
+            )
+        if data['cooking_time'] <= 0:
+            raise serializers.ValidationError(
+                'Время готовки должно быть больше нуля'
+            )
+        tags = data['tags']
+        list_tags = []
+        for tag in tags:
+            list_tags.append(tag)
+        if len(list_tags) != len(list(set(list_tags))):
+            raise serializers.ValidationError(
+                'Теги не должны повторяться'
+            )
+        return data
+
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    # id = RecipeListSerializer(source='recipes.id')
-    # name = RecipeSerializer(source='recipes.name')
-    # image = RecipeListSerializer(source='recipes.image')
-    # cooking_time = RecipeListSerializer(source='recipes.cooking_time')
+
     # image = Base64ImageField(use_url=True)
     # recipe = RecipeListSerializer()
     class Meta:
-        fields = ('recipe',)
-        # fields = ('id', 'name', 'image', 'cooking_time')
+        fields = '__all__'
         # read_only_fields = ('id', 'name', 'image', 'cooking_time')
         model = Favorite
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = ShoppingCart

@@ -1,13 +1,16 @@
+from django.db.models import Sum
 from rest_framework import viewsets
 from .serializers import (TagSerializer, RecipeSerializer, IngredientSerializer, RecipeListSerializer,
-                          FavoriteSerializer)
-from recipe.models import Tag, Recipe, Ingredient, Favorite
+                          FavoriteSerializer, ShoppingCartSerializer)
+from recipe.models import Tag, Recipe, Ingredient, Favorite, ShoppingCart, RecipeIngredient
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
+from rest_framework.decorators import action
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 # class CreateProfileView(generics.CreateAPIView):
@@ -113,35 +116,35 @@ class RecipeViewSet(viewsets.ModelViewSet):
     # def destroy(self, Des):
     #     recipe = get_object_or_404(Recipe, id=self.kwargs.get('recipe_id'))
     #     self.perform_destroy(recipe)
-# class AddingAndDeletingListMixin:
-#     serializer_class = None
-#     model_class = None
-#
-#     def post(self, request, recipe_id):
-#         user = request.user.id
-#         data = {"user": user, "recipe": recipe_id}
-#         serializer = self.serializer_class(
-#             data=data,
-#             context={"request": request},
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data, status.HTTP_201_CREATED)
-#
-#     def delete(self, request, recipe_id):
-#         user = request.user
-#         obj = get_object_or_404(
-#             self.model_class, user=user, recipe__id=recipe_id
-#         )
-#         obj.delete()
-#         model_title = self.model_class._meta.verbose_name.title()
-#         return Response(
-#             f"Успешно удалено: {model_title}!", status.HTTP_204_NO_CONTENT
-#         )
-#
-#
+class AddingAndDeletingListMixin:
+    serializer_class = None
+    model_class = None
+
+    def post(self, request, recipe_id):
+        user = request.user.id
+        data = {"user": user, "recipe": recipe_id}
+        serializer = self.serializer_class(
+            data=data,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        user = request.user
+        obj = get_object_or_404(
+            self.model_class, user=user, recipe__id=recipe_id
+        )
+        obj.delete()
+        model_title = self.model_class._meta.verbose_name.title()
+        return Response(
+            f"Успешно удалено: {model_title}!", status.HTTP_204_NO_CONTENT
+        )
+
+
 # class FavoriteViewSet(AddingAndDeletingListMixin, APIView):
-#     serializer_class = FavoriteRecipeSerizlizer
+#     serializer_class = FavoriteSerializer
 #     model_class = Favorite
 
 #
@@ -149,9 +152,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 #     serializer_class = PurchaseListSerializer
 #     model_class = PurchaseList
 
+
 class FavoriteViewSet(APIView):
     def post(self, request, recipe_id):
-        user = request.user.id
+        user = self.request.user.id
         print(request)
         print(recipe_id)
         data = {"user": user, "recipe": recipe_id}
@@ -174,3 +178,37 @@ class FavoriteViewSet(APIView):
         return Response(
             "Рецепт удален из избранного", status.HTTP_204_NO_CONTENT
         )
+
+
+class ShoppingCartView(APIView):
+    def post(self, request, recipe_id):
+        user = self.request.user.id
+        data = {"user": user, "recipe": recipe_id}
+        serializer = ShoppingCartSerializer(
+            data=data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        user = request.user
+        purchace_list_recipe = get_object_or_404(
+            ShoppingCart, user=user, recipe__id=recipe_id
+        )
+        purchace_list_recipe.delete()
+        return Response(
+            "Рецепт удален из списка покупок", status.HTTP_204_NO_CONTENT
+        )
+
+
+class APIDownload(APIView):
+    def get(self, request):
+        user = self.request.user
+        purchases = user.shopping.all()
+        lines = []
+        for purchase in purchases:
+            recipe = purchase.recipe
+            ingredients = RecipeIngredient.objects.filter(recipe=recipe).values('ingredient__name', 'ingredient__measurement_unit').annotate(quantity=Sum('amount'))
+            for ingredient in ingredients:
+                lines.append(f'{ingredient["ingredient__name"]}, {ingredient["ingredient__measurement_unit"]} - {ingredient["quantity"]}')

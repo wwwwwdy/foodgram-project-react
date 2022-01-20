@@ -1,6 +1,6 @@
 from django.contrib import admin
+
 from users.models import Follow
-# Register your models here.+
 
 
 class FollowAdmin(admin.ModelAdmin):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Tag, Ingredient, Recipe, CustomUser
+from .models import CustomUser, Favorite, Ingredient, Recipe, Tag
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -10,7 +10,6 @@ class UserAdmin(admin.ModelAdmin):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author')
     list_filter = ('author', 'name', 'tags')
-    # На странице рецепта вывести общее число добавлений этого рецепта в избранное.
 
 
 class IngredientAdmin(admin.ModelAdmin):
@@ -18,8 +17,13 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('name',)
 
 
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe',)
+
+
 admin.site.register(Recipe, RecipeAdmin)
 # admin.site.unregister(User)
 admin.site.register(CustomUser, UserAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag)
+admin.site.register(Favorite)

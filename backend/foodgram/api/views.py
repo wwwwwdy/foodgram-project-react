@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 
 from recipe.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                            ShoppingCart, Tag)
-
 from .filters import RecipeFilter
 from .mixins import AddingAndDeletingListMixin
 from .serializers import (FavoriteSerializer, IngredientSerializer,

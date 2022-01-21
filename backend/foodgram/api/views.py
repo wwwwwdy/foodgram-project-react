@@ -1,19 +1,19 @@
-from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, status, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.http import HttpResponse
 
 from recipe.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                            ShoppingCart, Tag)
 
+from .filters import RecipeFilter
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeListSerializer, RecipeSerializer,
                           ShoppingCartSerializer, TagSerializer)
-from .utils import render_to_pdf
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -80,11 +80,41 @@ class ShoppingCartView(AddingAndDeletingListMixin, APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ShoppingCartSerializer
     model_class = ShoppingCart
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     search_fields = ('tags',)
+    filterset_class = RecipeFilter
 
 
 class APIDownload(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
-        pdf = render_to_pdf('shopping_cart.html')
-        return HttpResponse(pdf, content_type="application/pdf")
+        recipes = request.user.shoppingcart.all().values_list(
+            'recipe', flat=True)
+        ingredients = (
+            IngredientRecipe.objects.filter(recipe__in=recipes)
+            .all()
+            .values_list('ingredient', flat=True)
+        )
+        buying_list = {}
+        for ingredient in ingredients:
+            name = ingredient.ingredient.name
+            amount = ingredient.amount
+            unit = ingredient.ingredient.measurement_unit
+            if name not in buying_list:
+                buying_list[name] = {'amount': amount, 'unit': unit}
+            else:
+                buying_list[name]['amount'] = (
+                    buying_list[name]['amount'] + amount
+                )
+        shopping_list = []
+        for item in buying_list:
+            shopping_list.append(
+                f'{item} - {buying_list[item]["amount"]}, '
+                f'{buying_list[item]["measurement_unit"]}\n'
+            )
+        response = HttpResponse(shopping_list, 'Content-Type: text/plain')
+        response['Content-Disposition'] = (
+            'attachment;' 'filename="shopping_list.txt"'
+        )
+        return response

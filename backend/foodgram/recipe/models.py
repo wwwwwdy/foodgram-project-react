@@ -46,6 +46,7 @@ class Recipe(models.Model):
                                          through='IngredientRecipe')
     tags = models.ManyToManyField(Tag, related_name='tags')
     cooking_time = models.IntegerField()
+    pub_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -53,6 +54,8 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+
+    ordering = ('-pub_date',)
 
 
 class IngredientRecipe(models.Model):
@@ -88,7 +91,8 @@ class Favorite(models.Model):
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(CustomUser,
-                             on_delete=models.CASCADE)
+                             on_delete=models.CASCADE,
+                             related_name='shoppingcart')
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,
                                related_name='shopping')

@@ -1,16 +1,16 @@
+from django.db.models import Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from recipe.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                            ShoppingCart, Tag)
 
 from .filters import RecipeFilter
+from .mixins import AddingAndDeletingListMixin
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeListSerializer, RecipeSerializer,
                           ShoppingCartSerializer, TagSerializer)
@@ -41,33 +41,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeListSerializer
 
 
-class AddingAndDeletingListMixin:
-    serializer_class = None
-    model_class = None
-
-    def post(self, request, recipe_id):
-        user = self.request.user.id
-        data = {"user": user, "recipe": recipe_id}
-        serializer = self.serializer_class(
-            data=data,
-            context={"request": request},
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_201_CREATED)
-
-    def delete(self, request, recipe_id):
-        user = request.user
-        obj = get_object_or_404(
-            self.model_class, user=user, recipe__id=recipe_id
-        )
-        obj.delete()
-        model_title = self.model_class._meta.verbose_name.title()
-        return Response(
-            f"Успешно удалено: {model_title}!", status.HTTP_204_NO_CONTENT
-        )
-
-
 class FavoriteViewSet(AddingAndDeletingListMixin, APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = FavoriteSerializer
@@ -92,9 +65,8 @@ class APIDownload(APIView):
         recipes = request.user.shoppingcart.all().values_list(
             'recipe', flat=True)
         ingredients = (
-            IngredientRecipe.objects.filter(recipe__in=recipes)
-            .all()
-            .values_list('ingredient', flat=True)
+            IngredientRecipe.objects.filter(
+                recipe__in=recipes).annotate(sum=(Sum('amount')))
         )
         buying_list = {}
         for ingredient in ingredients:

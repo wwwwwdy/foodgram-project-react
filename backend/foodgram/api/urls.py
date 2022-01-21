@@ -10,8 +10,11 @@ router.register(r'recipes', RecipeViewSet)
 router.register(r'ingredients', IngredientViewSet)
 
 urlpatterns = [
-    path('recipes/<int:recipe_id>/favorite/', FavoriteViewSet.as_view()),
-    path('recipes/<int:recipe_id>/shopping_cart/', ShoppingCartView.as_view()),
-    path('recipes/download_shopping_cart/', APIDownload.as_view()),
+    path('recipes/<int:recipe_id>/favorite/',
+         FavoriteViewSet.as_view(), name='favorite'),
+    path('recipes/<int:recipe_id>/shopping_cart/',
+         ShoppingCartView.as_view(), name='shopping-cart'),
+    path('recipes/download_shopping_cart/',
+         APIDownload.as_view(), name='download-shopping-cart'),
     path('', include(router.urls)),
 ]

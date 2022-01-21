@@ -7,38 +7,7 @@ from recipe.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                            ShoppingCart, Tag)
 from users.serializers import CustomUserSerializer
 
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        import base64
-        import uuid
-
-        import six
-        from django.core.files.base import ContentFile
-
-        if isinstance(data, six.string_types):
-            if 'data:' in data and ';base64,' in data:
-                header, data = data.split(';base64,')
-
-            try:
-                decoded_file = base64.b64decode(data)
-            except TypeError:
-                self.fail('invalid_image')
-
-            file_name = str(uuid.uuid4())[:12]
-            file_extension = self.get_file_extension(file_name, decoded_file)
-
-            complete_file_name = "%s.%s" % (file_name, file_extension, )
-
-            data = ContentFile(decoded_file, name=complete_file_name)
-
-        return super(Base64ImageField, self).to_internal_value(data)
-
-    def get_file_extension(self, file_name, decoded_file):
-        import imghdr
-        extension = imghdr.what(file_name, decoded_file)
-        extension = "jpg" if extension == "jpeg" else extension
-        return extension
+from .fields import Base64ImageField
 
 
 class TagSerializer(ModelSerializer):
@@ -92,9 +61,6 @@ class RecipeListSerializer(ModelSerializer):
             return False
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
-    def get_is_in_shopping_cart(self, obj):
-        pass
-
 
 class RecipeSerializer(ModelSerializer):
 
@@ -119,46 +85,33 @@ class RecipeSerializer(ModelSerializer):
         return Favorite.objects.filter(user=user,
                                        recipe=obj).exists()
 
+    def create_ingredients(self, ingredients, recipe):
+        for ingredient in ingredients:
+            IngredientRecipe.objects.create(
+                recipe=recipe,
+                amount=ingredient.get('amount'),
+                ingredient=ingredient.get('id')
+            )
+
+    def create_tags(self, tags, recipe):
+        for tag in tags:
+            recipe.tags.add(tag)
+
     def create(self, validated_data):
         author = self.context.get('request').user
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(author=author,
                                        **validated_data)
-        for ingredient in ingredients:
-            IngredientRecipe.objects.get_or_create(
-                recipe=recipe,
-                amount=ingredient.get('amount'),
-                ingredient=ingredient.get('id')
-            )
-
-        for tag in tags:
-            recipe.tags.add(tag)
+        self.create_ingredients(ingredients, recipe)
+        self.create_tags(tags, recipe)
         return recipe
 
     def update(self, instance, validated_data):
-        author = self.context.get('request').user
-        instance.ingredients.clear()
-        IngredientRecipe.objects.filter(recipe=instance).delete()
         instance.tags.clear()
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(author=author, **validated_data)
-        for tag in tags:
-            recipe.tags.add(tag)
-        for ingredient in ingredients:
-            IngredientRecipe.objects.create(
-                recipe=instance,
-                amount=ingredient.get('amount'),
-                ingredient=ingredient.get('id')
-            )
-        instance.image = validated_data.get('image', instance.image)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get('cooking_time',
-                                                   instance.cooking_time)
-        instance.save()
-
+        IngredientRecipe.objects.filter(recipe=instance).delete()
+        self.create_tags(validated_data.pop('tags'), instance)
+        self.create_ingredients(validated_data.pop('ingredients'), instance)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):

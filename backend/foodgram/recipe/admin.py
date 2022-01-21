@@ -22,7 +22,6 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Recipe, RecipeAdmin)
-# admin.site.unregister(User)
 admin.site.register(CustomUser, UserAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag)

@@ -72,9 +72,6 @@ class IngredientRecipe(models.Model):
                                on_delete=models.CASCADE)
     amount = models.IntegerField(verbose_name='Количество')
 
-    def __str__(self):
-        return f'{self.ingredient} {self.recipe}'
-
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
@@ -82,6 +79,9 @@ class IngredientRecipe(models.Model):
             models.UniqueConstraint(fields=('ingredient', 'recipe'),
                                     name='unique_recipe')
         ]
+
+    def __str__(self):
+        return f'{self.ingredient} {self.recipe}'
 
 
 class Favorite(models.Model):

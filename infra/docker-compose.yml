@@ -1,13 +1,14 @@
 version: '3.3'
 services:
   db:
-    image: nouchka/sqlite3:latest
+    image: postgres:13.0-alpine
     volumes:
-      - ./db/:/root/db/
+      - /var/lib/postgresql/data/
+    env_file:
+      - ../backend/foodgram/foodgram/.env
   backend:
-    build: ../backend/foodgram/
-#      context: ../backend
-#      dockerfile: Dockerfile
+    image: wwwwwdy/foodgram_backend
+#    build: ../backend/foodgram/
     restart: always
     volumes:
       - static_value:/app/static/

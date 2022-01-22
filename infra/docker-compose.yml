@@ -5,7 +5,8 @@ services:
     volumes:
       - /var/lib/postgresql/data/
     env_file:
-      - ../backend/foodgram/foodgram/.env
+#      - ../backend/foodgram/foodgram/.env
+      - ../infra/.env
   backend:
     image: wwwwwdy/foodgram_backend
 #    build: ../backend/foodgram/

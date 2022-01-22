@@ -6,7 +6,7 @@ services:
       - /var/lib/postgresql/data/
     env_file:
 #      - ../backend/foodgram/foodgram/.env
-      - ../infra/.env
+      - ./.env
   backend:
     image: wwwwwdy/foodgram_backend
 #    build: ../backend/foodgram/
@@ -17,7 +17,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ./infra/.env
+      - ./.env
   frontend:
     build:
       context: ../frontend

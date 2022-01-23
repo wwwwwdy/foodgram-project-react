@@ -33,7 +33,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    search_fields = ('tags',)
+    # search_fields = ('tags',)
 
     def get_serializer_class(self):
         if self.action == 'create':

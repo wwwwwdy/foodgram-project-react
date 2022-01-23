@@ -3,6 +3,7 @@ from django_filters import FilterSet, filters
 from recipe.models import Recipe, Favorite
 
 
+
 class RecipeFilter(FilterSet):
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug', lookup_expr='contains')
     # is_favorited = filters.BooleanFilter(method='filter_is_favorited')

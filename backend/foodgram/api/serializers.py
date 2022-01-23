@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 from rest_framework.serializers import (IntegerField, ModelSerializer,
                                         PrimaryKeyRelatedField, ReadOnlyField,
                                         SerializerMethodField)
@@ -40,13 +41,14 @@ class IngredientRecipeSerializer(ModelSerializer):
 class RecipeListSerializer(ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
+    image = Base64ImageField(use_url=True)
     ingredients = SerializerMethodField(read_only=True)
     is_favorited = SerializerMethodField(read_only=True)
     is_in_shopping_cart = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients',
+        fields = ('id', 'tags', 'author', 'image', 'ingredients',
                   'name', 'text', 'cooking_time', 'is_favorited',
                   'is_in_shopping_cart')
 
@@ -60,6 +62,9 @@ class RecipeListSerializer(ModelSerializer):
             return False
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
+    def get_is_in_shopping_cart(self, obj):
+        pass
+
 
 class RecipeSerializer(ModelSerializer):
 
@@ -68,8 +73,8 @@ class RecipeSerializer(ModelSerializer):
     tags = PrimaryKeyRelatedField(many=True,
                                   queryset=Tag.objects.all())
     ingredients = IngredientRecipeSerializer(many=True)
-    image = Base64ImageField()
-    is_favorited = SerializerMethodField('get_is_favorited')
+    image = Base64ImageField(use_url=True)
+    # is_favorited = SerializerMethodField('get_is_favorited')
 
     class Meta:
         fields = ('ingredients', 'tags', 'image',
@@ -77,12 +82,12 @@ class RecipeSerializer(ModelSerializer):
         read_only_fields = ('author',)
         model = Recipe
 
-    def get_is_favorited(self, obj):
-        user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return Favorite.objects.filter(user=user,
-                                       recipe=obj).exists()
+    # def get_is_favorited(self, obj):
+    #     user = self.context['request'].user
+    #     if user.is_anonymous:
+    #         return False
+    #     return Favorite.objects.filter(user=user,
+    #                                    recipe=obj).exists()
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
@@ -118,36 +123,66 @@ class RecipeSerializer(ModelSerializer):
         context = {'request': request}
         return RecipeListSerializer(instance, context=context).data
 
-    def validate(self, data):
-        ingredients = data['ingredients']
-        list_ingredients = []
-        for ingredient in ingredients:
-            if ingredient['amount'] <= 0:
-                raise serializers.ValidationError(
-                    'Количество ингредиента должно быть больше нуля'
-                )
-            list_ingredients.append(ingredient['ingredient'])
-        if not list_ingredients:
-            raise serializers.ValidationError(
-                'Нужно добавить хотя бы один ингредиент'
-            )
-        if len(list_ingredients) != len(list(set(list_ingredients))):
-            raise serializers.ValidationError(
-                'Ингридиенты не должны повторяться'
-            )
-        if data['cooking_time'] <= 0:
-            raise serializers.ValidationError(
-                'Время готовки должно быть больше нуля'
-            )
-        tags = data['tags']
-        list_tags = []
-        for tag in tags:
-            list_tags.append(tag)
-        if len(list_tags) != len(list(set(list_tags))):
-            raise serializers.ValidationError(
-                'Теги не должны повторяться'
-            )
-        return data
+    # def validate(self, data):
+    #     ingredients = data.get("ingredients")
+    #     if not ingredients:
+    #         raise serializers.ValidationError(
+    #             "Рецепту обязательно нужны ингридиенты!"
+    #         )
+    #     ingredient_list = []
+    #     for ingredient_item in ingredients:
+    #         ingredient = get_object_or_404(
+    #             Ingredient,
+    #             id=ingredient_item["id"],
+    #         )
+    #         if ingredient in ingredient_list:
+    #             raise serializers.ValidationError(
+    #                 "Пожалуйста, не дублируйте ингридиенты!"
+    #             )
+    #         ingredient_list.append(ingredient)
+    #         if int(ingredient_item["amount"]) < 0:
+    #             raise serializers.ValidationError(
+    #                 "Количество ингредиента должно быть больше 0!"
+    #             )
+    #     data["ingredients"] = ingredients
+    #     tags = data['tags']
+    #     list_tags = []
+    #     for tag in tags:
+    #         list_tags.append(tag)
+    #     if len(list_tags) != len(list(set(list_tags))):
+    #         raise serializers.ValidationError(
+    #             'Теги не должны повторяться'
+    #         )
+    #     return data
+    # def validate(self, data):
+    #     ingredients = data['ingredients']
+    #     list_ingredients = []
+    #     for ingredient in ingredients:
+    #         if ingredient['amount'] <= 0:
+    #             raise serializers.ValidationError(
+    #                 'Количество ингредиента должно быть больше нуля'
+    #             )
+    #         list_ingredients.append(ingredient['ingredient'])
+    #     if not list_ingredients:
+    #         raise serializers.ValidationError(
+    #             'Нужно добавить хотя бы один ингредиент'
+    #         )
+    #     if len(list_ingredients) != len(list(set(list_ingredients))):
+    #         raise serializers.ValidationError(
+    #             'Ингридиенты не должны повторяться'
+    #         )
+    #     if data['cooking_time'] <= 0:
+    #         raise serializers.ValidationError(
+    #             'Время готовки должно быть больше нуля'
+    #         )
+    #     tags = data['tags']
+    #     list_tags = []
+    #     for tag in tags:
+    #         list_tags.append(tag)
+    #     if len(list_tags) != len(list(set(list_tags))):
+    #         raise serializers.ValidationError(
+    #             'Теги не должны повторяться'
+    #         )
 
 
 class FavoriteSerializer(ModelSerializer):

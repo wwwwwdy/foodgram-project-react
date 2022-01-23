@@ -10,6 +10,7 @@ router.register(r'recipes', RecipeViewSet)
 router.register(r'ingredients', IngredientViewSet)
 
 urlpatterns = [
+    path('recipes/favorites/', FavoriteViewSet.as_view(), name='favorites'),
     path('recipes/<int:recipe_id>/favorite/',
          FavoriteViewSet.as_view(), name='favorite'),
     path('recipes/<int:recipe_id>/shopping_cart/',

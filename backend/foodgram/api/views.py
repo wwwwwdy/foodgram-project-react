@@ -31,7 +31,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeListSerializer
     pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
+    filterset_class = RecipeFilter
     search_fields = ('tags',)
 
     def get_serializer_class(self):
@@ -44,7 +45,8 @@ class FavoriteViewSet(AddingAndDeletingListMixin, APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = FavoriteSerializer
     model_class = Favorite
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
+    filterset_class = RecipeFilter
     search_fields = ('tags',)
 
 

@@ -41,7 +41,7 @@ class IngredientRecipeSerializer(ModelSerializer):
 class RecipeListSerializer(ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    image = Base64ImageField(use_url=True)
+    image = SerializerMethodField('get_image_url')
     ingredients = SerializerMethodField(read_only=True)
     is_favorited = SerializerMethodField(read_only=True)
     is_in_shopping_cart = SerializerMethodField(read_only=True)
@@ -51,6 +51,9 @@ class RecipeListSerializer(ModelSerializer):
         fields = ('id', 'tags', 'author', 'image', 'ingredients',
                   'name', 'text', 'cooking_time', 'is_favorited',
                   'is_in_shopping_cart')
+
+    def get_image_url(self, obj):
+        return obj.image.url
 
     def get_ingredients(self, obj):
         queryset = IngredientRecipe.objects.filter(recipe=obj)

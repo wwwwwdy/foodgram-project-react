@@ -13,6 +13,7 @@ from .mixins import AddingAndDeletingListMixin
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeListSerializer, RecipeSerializer,
                           ShoppingCartSerializer, TagSerializer)
+from .pagination import CustomPageNumberPagination
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -30,7 +31,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeListSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPagination
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = RecipeFilter
     # search_fields = ('tags',)
@@ -44,6 +45,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class FavoriteViewSet(AddingAndDeletingListMixin, APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = FavoriteSerializer
+    pagination_class = CustomPageNumberPagination
     model_class = Favorite
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -84,7 +86,7 @@ class APIDownload(APIView):
         for item in buying_list:
             shopping_list.append(
                 f'{item} - {buying_list[item]["amount"]}, '
-                f'{buying_list[item]["measurement_unit"]}\n'
+                f'{buying_list[item]["unit"]}\n'
             )
         response = HttpResponse(shopping_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = (

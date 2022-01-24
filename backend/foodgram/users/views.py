@@ -2,14 +2,14 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import CustomUser, Follow
-from .serializers import (CustomUserSerializer, UserRegistrationSerializer,
-                          UserSerializer)
-
+from .serializers import (CustomUserSerializer, UserRegistrationSerializer, FollowUserSerializer,
+                          FollowUserCreateSerializer)
+from api.pagination import CustomPageNumberPagination
 
 class CreateProfileView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
@@ -47,12 +47,22 @@ class ProfileUserViewSet(UserViewSet):
 
 class UserFollowingViewSet(viewsets.ModelViewSet):
 
+    pagination_class = CustomPageNumberPagination
     permission_classes = (IsAuthenticated,)
-    pagination_class = PageNumberPagination
+    serializer_class = FollowUserSerializer
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return FollowUserSerializer
+        return FollowUserCreateSerializer
 
     def list(self, request, *args, **kwargs):
-        queryset = CustomUser.objects.filter(id=request.user.id)
-        serializer = UserSerializer(queryset, many=True)
+        queryset = CustomUser.objects.filter(following__user=self.request.user)
+        # page = self.paginate_queryset(queryset)
+        # if page is not None:
+        #     serializer = FollowUserSerializer(page, many=True)
+        #     return self.get_paginated_response(serializer.data)
+        serializer = FollowUserSerializer(queryset, context={'request': request}, many=True)
         return Response(serializer.data)
 
     def create(self, request, id, *args, **kwargs):
@@ -69,3 +79,4 @@ class UserFollowingViewSet(viewsets.ModelViewSet):
             user=request.user.id,
             following=id).delete()
         return Response(status=201)
+

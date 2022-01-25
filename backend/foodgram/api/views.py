@@ -37,7 +37,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     # search_fields = ('tags',)
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == 'create' or self.action == 'update':
             return RecipeSerializer
         return RecipeListSerializer
 

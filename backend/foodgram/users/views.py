@@ -1,5 +1,7 @@
+from tkinter.messagebox import NO
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
+from html5lib import serialize
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
@@ -51,18 +53,22 @@ class UserFollowingViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = FollowUserSerializer
 
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return FollowUserSerializer
-        return FollowUserCreateSerializer
+    # def get_serializer_class(self):
+    #     if self.action in ('list', 'retrieve'):
+    #         return FollowUserSerializer
+    #     return FollowUserCreateSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        # user_id = self.request.user.id
+        return CustomUser.objects.filter(following__user=self.request.user)
 
     def list(self, request, *args, **kwargs):
         queryset = CustomUser.objects.filter(following__user=self.request.user)
-        # page = self.paginate_queryset(queryset)
-        # if page is not None:
-        #     serializer = FollowUserSerializer(page, many=True)
-        #     return self.get_paginated_response(serializer.data)
-        serializer = FollowUserSerializer(queryset, context={'request': request}, many=True)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = FollowUserSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = FollowUserSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     def create(self, request, id, *args, **kwargs):
@@ -80,3 +86,23 @@ class UserFollowingViewSet(viewsets.ModelViewSet):
             following=id).delete()
         return Response(status=201)
 
+class SubscriptionsView(generics.ListAPIView):
+    pagination_class = CustomPageNumberPagination
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FollowUserSerializer
+
+    def get_queryset(self):
+        user_id = self.request.user.id
+        return Follow.objects.filter(user=user_id)
+    
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.get_queryset()
+    #     paginator = CustomPageNumberPagination
+    #     print(request)
+    #     page = paginator.paginate_queryset(queryset, request)
+    #     if page is not None:
+    #         serializer = FollowUserSerializer(page, many=True, context={'request': request})
+    #         return paginator.get_paginated_response(serializer.data)
+    #     else:
+    #         serializer = FollowUserSerializer(queryset, many=True, context={'request': request})
+    #     return Response(serializer.data, status=status.HTTP_200_OK)

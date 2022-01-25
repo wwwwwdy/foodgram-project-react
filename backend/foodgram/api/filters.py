@@ -1,6 +1,7 @@
+from django.forms import fields
 from django_filters import FilterSet, filters
-
-from recipe.models import Recipe, Favorite
+from rest_framework.filters import SearchFilter
+from recipe.models import Recipe, Favorite, Ingredient
 
 
 
@@ -25,3 +26,7 @@ class RecipeFilter(FilterSet):
             return queryset.filter(shopping__user=self.request.user)
         else:
             return queryset.filter(shopping__user__isnull=True)
+
+
+class IngredientFilter(SearchFilter):
+    search_param = 'name'

@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from .views import UserFollowingViewSet, SubscriptionsView
+from .views import UserFollowingViewSet
 
 urlpatterns = [
     path('users/subscriptions/',

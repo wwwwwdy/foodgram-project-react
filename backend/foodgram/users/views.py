@@ -1,4 +1,3 @@
-from tkinter.messagebox import NO
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from html5lib import serialize
@@ -77,14 +76,14 @@ class UserFollowingViewSet(viewsets.ModelViewSet):
         obj, _ = Follow.objects.update_or_create(
             user=user,
             following=follower)
-        return Response(status=201)
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['delete'], detail=False)
     def delete(self, request, id):
         Follow.objects.filter(
             user=request.user.id,
             following=id).delete()
-        return Response(status=201)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class SubscriptionsView(generics.ListAPIView):
     pagination_class = CustomPageNumberPagination

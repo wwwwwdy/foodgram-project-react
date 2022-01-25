@@ -23,7 +23,6 @@ services:
       - ./.env
   frontend:
     image: wwwwwdy/foodgram_frontend
-
     volumes:
       - ../frontend/:/app/result_build/
   nginx:

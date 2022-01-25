@@ -2,18 +2,17 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
 from recipe.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                            ShoppingCart, Tag)
-from .filters import RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .mixins import AddingAndDeletingListMixin
+from .pagination import CustomPageNumberPagination
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeListSerializer, RecipeSerializer,
                           ShoppingCartSerializer, TagSerializer)
-from .pagination import CustomPageNumberPagination
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -26,6 +25,9 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
+    filter_backends = [IngredientFilter]
+    search_fields = ('^name',)
+    permission_classes = (AllowAny,)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -34,10 +36,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    # search_fields = ('tags',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
+        if self.action == 'create' or self.action == 'partial_update':
             return RecipeSerializer
         return RecipeListSerializer
 

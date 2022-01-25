@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 from rest_framework.serializers import (IntegerField, ModelSerializer,
                                         PrimaryKeyRelatedField, ReadOnlyField,
                                         SerializerMethodField)
@@ -36,7 +36,6 @@ class IngredientRecipeSerializer(ModelSerializer):
     class Meta:
         model = IngredientRecipe
         fields = ('name', 'measurement_unit', 'id', 'amount',)
-
 
 
 class RecipeListSerializer(ModelSerializer):
@@ -81,20 +80,12 @@ class RecipeSerializer(ModelSerializer):
                                   queryset=Tag.objects.all())
     ingredients = IngredientRecipeSerializer(many=True)
     image = Base64ImageField(use_url=True)
-    # is_favorited = SerializerMethodField('get_is_favorited')
 
     class Meta:
         fields = ('ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time', 'author')
         read_only_fields = ('author',)
         model = Recipe
-
-    # def get_is_favorited(self, obj):
-    #     user = self.context['request'].user
-    #     if user.is_anonymous:
-    #         return False
-    #     return Favorite.objects.filter(user=user,
-    #                                    recipe=obj).exists()
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
@@ -132,14 +123,12 @@ class RecipeSerializer(ModelSerializer):
 
     def validate(self, data):
         ingredients = data.get("ingredients")
-        # print(ingredients)
         if not ingredients:
             raise serializers.ValidationError(
                 "Рецепту обязательно нужны ингридиенты!"
             )
         ingredient_list = []
         for ingredient_item in ingredients:
-            print(ingredient_item)
             ingredient = get_object_or_404(
                 Ingredient,
                 id=ingredient_item["id"].id,

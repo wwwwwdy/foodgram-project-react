@@ -1,16 +1,17 @@
-from django.forms import fields
 from django_filters import FilterSet, filters
 from rest_framework.filters import SearchFilter
-from recipe.models import Recipe, Favorite, Ingredient
 
+from recipe.models import Recipe
 
 
 class RecipeFilter(FilterSet):
-    tags = filters.AllValuesMultipleFilter(field_name='tags__slug', lookup_expr='contains')
-    # is_favorited = filters.BooleanFilter(method='filter_is_favorited')
+    tags = filters.AllValuesMultipleFilter(field_name='tags__slug',
+                                           lookup_expr='contains')
     is_favorited = filters.NumberFilter(method='filter_is_favorited')
-    is_in_shopping_cart = filters.NumberFilter(method='filter_is_in_shopping_cart')
-    # is_favorited = filters.ModelChoiceFilter(queryset=Favorite.objects.filter(user=user))
+    is_in_shopping_cart = filters.NumberFilter(
+        method='filter_is_in_shopping_cart'
+    )
+
     class Meta:
         model = Recipe
         fields = ('tags', 'is_favorited', 'is_in_shopping_cart',)

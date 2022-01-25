@@ -36,6 +36,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    permission_classes = (AllowAny,)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'partial_update':

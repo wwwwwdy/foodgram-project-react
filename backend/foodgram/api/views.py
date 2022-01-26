@@ -22,21 +22,21 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
     filter_backends = [IngredientFilter]
     search_fields = ('^name',)
-    permission_classes = (AllowAny,)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
     queryset = Recipe.objects.all()
     serializer_class = RecipeListSerializer
     pagination_class = CustomPageNumberPagination
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = (AllowAny,)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'partial_update':

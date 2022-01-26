@@ -145,7 +145,7 @@ class RecipeSerializer(ModelSerializer):
         if data['cooking_time'] <= 0:
             raise serializers.ValidationError(
                 'Время готовки должно быть больше нуля'
-        )
+            )
         data["ingredients"] = ingredients
         tags = data['tags']
         list_tags = []

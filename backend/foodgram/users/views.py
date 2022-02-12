@@ -78,8 +78,6 @@ class CreateFollow(APIView):
     def post(self, request, id):
         user = self.request.user
         following = get_object_or_404(CustomUser, id=id)
-        print(user)
-        print(following)
         data = {'user': user.id, 'following': following.id}
         serializer = FollowUserCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)

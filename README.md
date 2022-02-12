@@ -1,4 +1,4 @@
-![tests](https://github.com/wwwwwdy/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
+![Actions Status](https://github.com/wwwwwdy/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 # Foodgram
 ### Foodgram - это ваш продуктовый помощник
 ***
